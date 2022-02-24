@@ -47,6 +47,7 @@ public class ClientIdUpperCaseUDPBurst {
 
     private State state;
     private long lastSend;
+    private int currentId;
 
     private static void usage() {
         System.err.println("Usage : ClientIdUpperCaseUDPOneByOne in-filename out-filename timeout host port ");
@@ -150,6 +151,7 @@ public class ClientIdUpperCaseUDPBurst {
                 }
                 LOGGER.warning("Didn't received expected packet, retrying");
                 state = State.SENDING;
+                currentId = 0;
             case SENDING:
                 uniqueKey.interestOps(SelectionKey.OP_WRITE);
                 return 0;
@@ -197,15 +199,16 @@ public class ClientIdUpperCaseUDPBurst {
      * @throws IOException
      */
     private void doWrite() throws IOException {
-        for (int i = 0; i < buffers.length; i++) {
-            if (bitSet.get(i)) {
-                dc.send(buffers[i].flip(), serverAddress);
-                LOGGER.info("Tried so send packet " + i);
-            }
+        if (bitSet.get(currentId)) {
+            dc.send(buffers[currentId].flip(), serverAddress);
+            LOGGER.info("Tried so send packet " + currentId);
         }
 
+        currentId++;
         lastSend = System.currentTimeMillis();
         receiveBuffer.clear();
-        state = State.RECEIVING;
+        if (currentId == buffers.length) {
+            state = State.RECEIVING;
+        }
     }
 }

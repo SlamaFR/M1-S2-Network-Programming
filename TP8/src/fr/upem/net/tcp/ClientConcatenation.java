@@ -45,14 +45,14 @@ public class ClientConcatenation {
      */
     private static Optional<String> requestConcatenation(SocketChannel sc, List<String> list) throws IOException {
         var buffers = list.stream().map(UTF8::encode).toList();
-        var sizes = buffers.stream().mapToInt(ByteBuffer::capacity).sum();
+        var sizes = buffers.stream().mapToInt(ByteBuffer::remaining).sum();
         var buffer = ByteBuffer.allocate(Integer.BYTES + Integer.BYTES * list.size() + sizes);
         buffer.putInt(list.size());
         for (var b : buffers) {
-            buffer.putInt(b.capacity());
+            buffer.putInt(b.remaining());
             buffer.put(b);
         }
-        sc.write(buffer.flip());
+        sc.write(buffer.flip()); // Should have used a finite-sized buffer, and filling/writing multiple times (as needed)
 
         buffer = ByteBuffer.allocate(Integer.BYTES);
         if (!ClientEOS.readFully(sc, buffer)) {

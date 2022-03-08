@@ -36,7 +36,7 @@ public record HTTPClient(InetSocketAddress server, String resource) {
             }
             var charset = header.getCharset().orElse(US_ASCII);
             if (header.isChunkedTransfer()) {
-                return charset.decode(reader.readChunks()).toString();
+                return charset.decode(reader.readChunks().flip()).toString();
             } else {
                 var contentLength = header.getContentLength();
                 return charset.decode(reader.readBytes(contentLength).flip()).toString();
@@ -45,8 +45,8 @@ public record HTTPClient(InetSocketAddress server, String resource) {
     }
 
     public static void main(String[] args) throws IOException {
-        var google = new InetSocketAddress("www-igm.univ-mlv.fr", 80);
-        var res = new HTTPClient(google, "/~carayol/redirect.php").get();
+        var google = new InetSocketAddress("google.com", 80);
+        var res = new HTTPClient(google, "/").get();
         System.out.println(res);
     }
 

@@ -65,7 +65,7 @@ public class HTTPReader {
             line = readLineCRLF();
             if (!line.isEmpty()) {
                 var split = line.split(": ");
-                fields.compute(split[0], (k, v) -> v == null ? split[1] : v.concat(split[1]));
+                fields.compute(split[0], (k, v) -> v == null ? split[1] : v + ";" + split[1]);
             }
         } while (!line.isEmpty());
         return HTTPHeader.create(response, fields);

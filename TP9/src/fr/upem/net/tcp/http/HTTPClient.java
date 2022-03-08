@@ -2,6 +2,7 @@ package fr.upem.net.tcp.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -18,6 +19,12 @@ public record HTTPClient(InetSocketAddress server, String resource) {
 
             var reader = new HTTPReader(sc, ByteBuffer.allocate(2048));
             var header = reader.readHeader();
+
+            if (header.getCode() == 301 || header.getCode() == 302) {
+                var newLocation = new URL(header.getFields().getOrDefault("location", ""));
+                var newServer = new InetSocketAddress(newLocation.getHost(), 80);
+                return new HTTPClient(newServer, newLocation.getPath()).get();
+            }
 
             if (header.getCode() != 200) {
                 return "";
@@ -38,8 +45,8 @@ public record HTTPClient(InetSocketAddress server, String resource) {
     }
 
     public static void main(String[] args) throws IOException {
-        var google = new InetSocketAddress("www.w3.org", 80);
-        var res = new HTTPClient(google, "/").get();
+        var google = new InetSocketAddress("www-igm.univ-mlv.fr", 80);
+        var res = new HTTPClient(google, "/~carayol/redirect.php").get();
         System.out.println(res);
     }
 

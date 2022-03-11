@@ -36,7 +36,7 @@ public class FixedPrestartedLongSumServer {
                 logger.info("Connection accepted from " + client.getRemoteAddress());
                 serve(client);
             } catch (IOException ioe) {
-                logger.log(Level.SEVERE, "Connection terminated with client by IOException", ioe.getCause());
+                logger.log(Level.INFO, "Connection terminated with client by IOException", ioe.getCause());
             } finally {
                 silentlyClose(client);
             }
